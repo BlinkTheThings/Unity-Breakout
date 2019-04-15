@@ -53,3 +53,6 @@ TagManager:
   - name: Floor
     uniqueID: 993908445
     locked: 0
+  - name: Text
+    uniqueID: 2237431387
+    locked: 0

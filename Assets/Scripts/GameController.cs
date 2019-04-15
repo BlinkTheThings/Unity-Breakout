@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -13,12 +14,20 @@ public class GameController : MonoBehaviour
     public Color BaseColor;
     public float BallSpeed;
     public float PaddleSpeed;
+    public Text ScoreText; 
 
     private readonly bool gameStarted = false;
     private List<GameObject> bricks = new List<GameObject>();
 
+    private int score;
+
     void Start()
     {
+        score = 0;
+        ScoreText.text = "Score: " + score.ToString();
+
+        Ball.GetComponent<BallController>().BrickHit += new BallController.BrickHitHandler(OnBrickHit);
+
         Paddle.GetComponent<PaddleController>().Speed = PaddleSpeed;
 
         Ball.GetComponent<SpriteRenderer>().color = BaseColor * 1.5f;
@@ -39,6 +48,13 @@ public class GameController : MonoBehaviour
                 bricks.Add(newBrick);
             }
         }
+    }
+
+
+    public void OnBrickHit()
+    {
+        score += 10;
+        ScoreText.text = "Score: " + score.ToString();
     }
 
     void Update()
