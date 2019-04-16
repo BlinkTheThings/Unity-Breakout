@@ -15,7 +15,8 @@ public class GameController : MonoBehaviour
     public float BallSpeed;
     public float PaddleSpeed;
     public Text ScoreText; 
-    public Text LivesText; 
+    public Text LivesText;
+    public Text GameOverText;
 
     private bool gameStarted = false;
     private List<GameObject> bricks = new List<GameObject>();
@@ -31,6 +32,8 @@ public class GameController : MonoBehaviour
 
         lives = 3;
         LivesText.text = "Lives: " + lives.ToString();
+
+        GameOverText.gameObject.SetActive(false);
 
         Ball.GetComponent<BallController>().BrickHit += new BallController.BrickHitHandler(OnBrickHit);
         Ball.GetComponent<BallController>().FloorHit += new BallController.FloorHitHandler(OnFloorHit);
@@ -77,6 +80,10 @@ public class GameController : MonoBehaviour
         {
             gameStarted = false;
             Ball.transform.position = ballStartPosition;
+        }
+        else
+        {
+            GameOverText.gameObject.SetActive(true);
         }
     }
 
