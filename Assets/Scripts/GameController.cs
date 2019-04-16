@@ -15,18 +15,27 @@ public class GameController : MonoBehaviour
     public float BallSpeed;
     public float PaddleSpeed;
     public Text ScoreText; 
+    public Text LivesText; 
 
-    private readonly bool gameStarted = false;
+    private bool gameStarted = false;
     private List<GameObject> bricks = new List<GameObject>();
 
     private int score;
+    private int lives;
+    private Vector3 ballStartPosition;
 
     void Start()
     {
         score = 0;
         ScoreText.text = "Score: " + score.ToString();
 
+        lives = 3;
+        LivesText.text = "Lives: " + lives.ToString();
+
         Ball.GetComponent<BallController>().BrickHit += new BallController.BrickHitHandler(OnBrickHit);
+        Ball.GetComponent<BallController>().FloorHit += new BallController.FloorHitHandler(OnFloorHit);
+
+        ballStartPosition = Ball.transform.position;
 
         Paddle.GetComponent<PaddleController>().Speed = PaddleSpeed;
 
@@ -57,16 +66,30 @@ public class GameController : MonoBehaviour
         ScoreText.text = "Score: " + score.ToString();
     }
 
+    public void OnFloorHit()
+    {
+        lives--;
+        LivesText.text = "Lives: " + lives.ToString();
+
+        Ball.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+
+        if (lives > 0)
+        {
+            gameStarted = false;
+            Ball.transform.position = ballStartPosition;
+        }
+    }
+
     void Update()
     {
         if (!gameStarted && Input.GetKeyDown(KeyCode.Space))
         {
             Ball.GetComponent<Rigidbody2D>().velocity = (Vector2.down + Vector2.right) * BallSpeed;
+            gameStarted = true;
         }
 
         if (bricks.Count == 0)
         {
-            Ball.SetActive(false);
         }
     }
 }
