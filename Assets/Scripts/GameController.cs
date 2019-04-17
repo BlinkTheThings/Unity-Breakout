@@ -17,9 +17,13 @@ public class GameController : MonoBehaviour
     public Text ScoreText; 
     public Text LivesText;
     public Text GameOverText;
+    public Text WinText;
 
-    private bool gameStarted = false;
-    private List<GameObject> bricks = new List<GameObject>();
+    enum GameState { NewGame, Playing, NewBall, WinGame, GameOver};
+
+    private GameState gameState;
+
+    private List<GameObject> bricks;
 
     private int score;
     private int lives;
@@ -27,6 +31,23 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        Ball.GetComponent<BallController>().BrickHit += new BallController.BrickHitHandler(OnBrickHit);
+        Ball.GetComponent<BallController>().FloorHit += new BallController.FloorHitHandler(OnFloorHit);
+        Ball.GetComponent<SpriteRenderer>().color = BaseColor * 1.5f;
+
+        ballStartPosition = Ball.transform.position;
+
+        Paddle.GetComponent<PaddleController>().Speed = PaddleSpeed;
+
+        NewGame();
+    }
+
+    private void NewGame()
+    {
+        Ball.transform.position = ballStartPosition;
+
+        gameState = GameState.NewGame;
+
         score = 0;
         ScoreText.text = "Score: " + score.ToString();
 
@@ -34,15 +55,7 @@ public class GameController : MonoBehaviour
         LivesText.text = "Lives: " + lives.ToString();
 
         GameOverText.gameObject.SetActive(false);
-
-        Ball.GetComponent<BallController>().BrickHit += new BallController.BrickHitHandler(OnBrickHit);
-        Ball.GetComponent<BallController>().FloorHit += new BallController.FloorHitHandler(OnFloorHit);
-
-        ballStartPosition = Ball.transform.position;
-
-        Paddle.GetComponent<PaddleController>().Speed = PaddleSpeed;
-
-        Ball.GetComponent<SpriteRenderer>().color = BaseColor * 1.5f;
+        WinText.gameObject.SetActive(false);
 
         float brickWidth = Brick.GetComponent<Renderer>().bounds.size.x;
         float brickHeight = Brick.GetComponent<Renderer>().bounds.size.y;
@@ -50,9 +63,21 @@ public class GameController : MonoBehaviour
         float left = LeftWall.GetComponent<Renderer>().bounds.max.x + (brickWidth * 0.5f);
         float top = Ceiling.GetComponent<Renderer>().bounds.min.y - (brickHeight * 1.5f);
 
-        for (int row = 0; row < 3; row++)
+        if (bricks != null)
         {
-            for (int col = 0; col < 8; col++)
+            foreach(var brick in bricks)
+            {
+                Destroy(brick);
+            }
+        }
+
+        bricks = new List<GameObject>();
+
+        for (int row = 0; row < 1; row++)
+        //for (int row = 0; row < 3; row++)
+        {
+            for (int col = 6; col < 7; col++)
+            //for (int col = 0; col < 8; col++)
             {
                 var newBrick = Instantiate(Brick);
                 newBrick.transform.position = new Vector3(left + (col * brickWidth), top - (row * brickHeight));
@@ -62,11 +87,20 @@ public class GameController : MonoBehaviour
         }
     }
 
-
-    public void OnBrickHit()
+    public void OnBrickHit(GameObject brick)
     {
         score += 10;
         ScoreText.text = "Score: " + score.ToString();
+
+        bricks.Remove(brick);
+        Destroy(brick);
+
+        if (bricks.Count == 0)
+        {
+            Ball.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            gameState = GameState.WinGame;
+            WinText.gameObject.SetActive(true);
+        }
     }
 
     public void OnFloorHit()
@@ -78,25 +112,29 @@ public class GameController : MonoBehaviour
 
         if (lives > 0)
         {
-            gameStarted = false;
+            gameState = GameState.NewBall;
             Ball.transform.position = ballStartPosition;
         }
         else
         {
+            gameState = GameState.GameOver;
             GameOverText.gameObject.SetActive(true);
         }
     }
 
     void Update()
     {
-        if (!gameStarted && Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            Ball.GetComponent<Rigidbody2D>().velocity = (Vector2.down + Vector2.right) * BallSpeed;
-            gameStarted = true;
-        }
-
-        if (bricks.Count == 0)
-        {
+            if (gameState == GameState.NewGame || gameState == GameState.NewBall)
+            {
+                gameState = GameState.Playing;
+                Ball.GetComponent<Rigidbody2D>().velocity = (Vector2.down + Vector2.right) * BallSpeed;
+            }
+            else if (gameState == GameState.GameOver || gameState == GameState.WinGame)
+            {
+                NewGame();
+            }
         }
     }
 }

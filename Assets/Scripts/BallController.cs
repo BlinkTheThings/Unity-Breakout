@@ -2,7 +2,7 @@
 
 public class BallController : MonoBehaviour
 {
-    public delegate void BrickHitHandler();
+    public delegate void BrickHitHandler(GameObject brick);
     public event BrickHitHandler BrickHit;
 
     public delegate void FloorHitHandler();
@@ -12,8 +12,7 @@ public class BallController : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Brick"))
         {
-            BrickHit?.Invoke();
-            Destroy(collision.gameObject);
+            BrickHit?.Invoke(collision.gameObject);
         }
         else if (collision.gameObject.CompareTag("Floor"))
         {
