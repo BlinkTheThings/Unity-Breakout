@@ -49,10 +49,10 @@ public class GameController : MonoBehaviour
         gameState = GameState.NewGame;
 
         score = 0;
-        ScoreText.text = "Score: " + score.ToString();
+        ScoreText.text = "SCORE: " + score.ToString();
 
         lives = 3;
-        LivesText.text = "Lives: " + lives.ToString();
+        LivesText.text = "LIVES: " + lives.ToString();
 
         GameOverText.gameObject.SetActive(false);
         WinText.gameObject.SetActive(false);
@@ -73,11 +73,9 @@ public class GameController : MonoBehaviour
 
         bricks = new List<GameObject>();
 
-        for (int row = 0; row < 1; row++)
-        //for (int row = 0; row < 3; row++)
+        for (int row = 0; row < 3; row++)
         {
-            for (int col = 6; col < 7; col++)
-            //for (int col = 0; col < 8; col++)
+            for (int col = 0; col < 8; col++)
             {
                 var newBrick = Instantiate(Brick);
                 newBrick.transform.position = new Vector3(left + (col * brickWidth), top - (row * brickHeight));
@@ -90,7 +88,7 @@ public class GameController : MonoBehaviour
     public void OnBrickHit(GameObject brick)
     {
         score += 10;
-        ScoreText.text = "Score: " + score.ToString();
+        ScoreText.text = "SCORE: " + score.ToString();
 
         bricks.Remove(brick);
         Destroy(brick);
@@ -106,7 +104,7 @@ public class GameController : MonoBehaviour
     public void OnFloorHit()
     {
         lives--;
-        LivesText.text = "Lives: " + lives.ToString();
+        LivesText.text = "LIVES: " + lives.ToString();
 
         Ball.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
 
